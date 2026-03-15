@@ -1,0 +1,26 @@
+# macOS
+.DS_Store
+
+# Internal documentation
+GEMINI.md
+
+# Secrets and internal assets
+assets/top_secret.txt
+
+# Development files
+package-lock.json
+node_modules/
+
+# Test files and directories (in case you add them)
+test/
+tests/
+__tests__/
+*.test.js
+*.spec.js
+coverage/
+
+# Local configuration
+.env
+.env.local
+.env.development
+.env.production

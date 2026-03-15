@@ -1,0 +1,20 @@
+{
+  "name": "jarek-system-inc",
+  "version": "1.2.7",
+  "description": "A futuristic terminal assistant with sci-fi boot sequences and interactive commands.",
+  "bin": {
+    "jarek": "./bin/index.js"
+  },
+  "files": [
+    "bin",
+    "lib",
+    "assets/jarek-startup.wav",
+    "assets/top_secret.txt",
+    "README.md"
+  ],
+  "dependencies": {
+    "chalk": "^4.1.2",
+    "figlet": "^1.11.0",
+    "gradient-string": "^3.0.0"
+  }
+}
