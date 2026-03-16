@@ -6,11 +6,10 @@ const gradient = require("gradient-string");
 const path = require("path");
 const readline = require("readline");
 const fs = require("fs");
-const { playSound, resources, loadConfig, deleteConfig, checkOllamaStatus, askQuestion, removeOllamaModel, uninstallOllamaApp } = require("../lib/utils");
+const { playSound, resources, loadConfig, deleteConfig, checkOllamaStatus, askQuestion, removeOllamaModel, uninstallOllamaApp, startOllamaSilently, stopOllama } = require("../lib/utils");
 const { startChat } = require("../lib/commands");
 const { runSetup } = require("../lib/setup");
 const pkg = require("../package.json");
-const { execSync } = require("child_process");
 
 function updateBootDisplay(current, total, message, status = " [OK] ") {
   const width = 40, progress = Math.round((current / total) * width), empty = width - progress;
@@ -23,6 +22,9 @@ function updateBootDisplay(current, total, message, status = " [OK] ") {
 }
 
 async function main() {
+  process.on("SIGINT", () => { stopOllama(); process.exit(); });
+  process.on("exit", () => stopOllama());
+
   if (process.argv.includes("--version") || process.argv.includes("-v")) { console.log(chalk.cyan.bold(`Jarek v${pkg.version}`)); process.exit(0); }
   if (process.argv.includes("--uninstall")) {
     const config = loadConfig(), confirm = await askQuestion(chalk.red.bold("Sir, uninstall and clear data? (Y/N): "));
@@ -46,7 +48,7 @@ async function main() {
         if (i < totalSteps) {
           let statusStr = " [OK] ", currentMsg = resources[i];
           if (currentMsg.includes("Ollama heartbeat")) {
-            if (!(await checkOllamaStatus())) { statusStr = " [PWR] "; currentMsg = "Waking up Ollama..."; if (process.platform === "darwin") try { execSync("open -a Ollama", { stdio: "ignore" }); } catch(e) {} }
+            if (!(await checkOllamaStatus())) { statusStr = " [PWR] "; currentMsg = "Starting AI Engine silently..."; await startOllamaSilently(); }
           }
           if (currentMsg.includes("Loading configuration") && !fs.existsSync(path.join(require("os").homedir(), ".jarekrc"))) statusStr = " [ERR] ";
           if (currentMsg.includes("Scanning authorized sectors") && !config.authorized_dirs.every(d => fs.existsSync(d))) statusStr = " [WRN] ";
@@ -54,7 +56,7 @@ async function main() {
           i++;
         } else {
           clearInterval(interval); readline.moveCursor(process.stdout, 0, 2); process.stdout.write("\n\x1B[?25h");
-          if (!(await checkOllamaStatus())) { console.log(chalk.red("\n❌ AI Engine failed. Start Ollama manually.")); process.exit(1); }
+          if (!(await checkOllamaStatus())) { console.log(chalk.red("\n❌ AI Engine failed. Start Ollama manually.")); stopOllama(); process.exit(1); }
           playSound(systemSound); console.log(chalk.green.bold("✅ System ready\n")); startChat(config);
         }
       }, intervalTime);
