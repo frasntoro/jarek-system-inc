@@ -1,6 +1,6 @@
 {
   "name": "jarek-system-inc",
-  "version": "1.3.0",
+  "version": "1.3.5",
   "description": "Futuristic AI Butler for macOS. Interactive terminal assistant integrated with Ollama for local LLM execution.",
   "bin": {
     "jarek": "./bin/index.js"

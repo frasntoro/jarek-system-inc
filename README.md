@@ -4,7 +4,7 @@ A futuristic AI Butler for your macOS Terminal. Jarek is an interactive CLI assi
 
 ![Jarek Preview](https://raw.githubusercontent.com/frasntoro/jarek-system-inc/main/assets/preview.png)
 
-## 🚀 Evolution 1.3.0
+## 🚀 Evolution 1.3.5
 
 Jarek has evolved from a simple aesthetic CLI to a fully functional **Local AI Agent**.
 
