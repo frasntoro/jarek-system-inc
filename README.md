@@ -1,47 +1,72 @@
-# JAREK System Inc.
+# Jarek System Inc. 🤖
 
-**JAREK Inc.** terminal interface! Transform your terminal into a futuristic AI initialization sequence with interactive commands.
+A futuristic AI Butler for your macOS Terminal. Jarek is an interactive CLI assistant integrated with **Ollama** to run Large Language Models (LLMs) locally on your machine.
 
-## What is this?
+![Jarek Preview](https://raw.githubusercontent.com/frasntoro/jarek-system-inc/main/assets/preview.png)
 
-Inspired by the Iron Man Jarvis system, this tool simulates a high-tech boot sequence for your machine. Whether you're starting a coding session or just want to impress someone, JAREK brings that Stark Industries vibe to your command line.
+## 🚀 Evolution 1.3.0
 
-> **Note:** This is a *just-for-fun* project. It doesn't actually calibrate AI heuristics (yet), but it sounds and looks like it does!
+Jarek has evolved from a simple aesthetic CLI to a fully functional **Local AI Agent**.
 
-## Features
+### Key Features:
 
-- **Immersive Audio**: High-quality futuristic startup sound (macOS & Windows supported).
-- **Stark-Style ASCII**: Bold "JAREK Inc." branding with Instagram-style gradients.
-- **Boot Sequence Simulation**: Dynamic scanning of drive chains, power cells, and AI cores with retro animations.
-- **Interactive AI Prompt**: Once initialized, JAREK waits for your orders.
-- **Matrix Override**: Trigger a secret orange-themed Matrix rain with the JAREK core logo.
-- **System Ready Ping**: A final notification sound once the initialization is complete.
-- **File Deployment**: Ability to extract classified briefings directly to your desktop.
-
-## Available Commands
-
-Once JAREK is online, you can interact with him using the following commands:
-
-- **break**: Clears the terminal and initiates the Matrix-style digital rain animation.
-- **protocol**: Accesses encrypted archives and deploys the `top_secret.txt` briefing directly to your Desktop.
-- **exit / quit / ciao**: Gracefully terminates the assistant session.
+- **Local AI Brain:** Uses Ollama to run models like Llama 3 or Phi-3 offline.
+- **Smart Context:** Automatically sees your current directory files and context.
+- **Real Execution:** Can create files, open apps, and navigate your system (with permission).
+- **Setup Wizard:** Guided calibration for RAM, Storage, and Ollama installation.
+- **Sci-Fi Experience:** Original startup music, ASCII art, and Matrix mode.
+- **Strict English Persona:** Professional and concise butler tone.
 
 ## Installation
-
-Make sure you have [Node.js](https://nodejs.org/) installed, then fire up your terminal and run:
 
 ```bash
 npm install -g jarek-system-inc
 ```
 
-## Usage
+## Quick Start
 
-Run the assistant from your terminal:
+Just type `jarek` in your terminal:
 
 ```bash
 jarek
 ```
 
+On your first run, Jarek will initiate a **Calibration Sequence** to:
+
+1. Scan your hardware (RAM).
+2. Check/Install Ollama AI Engine.
+3. Download your preferred Intelligence (Model).
+4. Authorize access to specific sectors (Desktop/Documents).
+
+## Interaction
+
+You can talk to Jarek in natural language:
+
+- _"Create a folder named ProjectX on my Desktop"_
+- _"What files are in this directory?"_
+- _"Summarize the content of @README.md"_
+- _"What's the weather in Milan today?"_ (Uses real-time `curl` data)
+
+### Special Commands:
+
+- `setup`: Re-run the calibration wizard.
+- `authorize <path>`: Add a new folder to Jarek's sight.
+- `forget <name>`: Remove a folder from Jarek's sight.
+- `break`: Enter Matrix simulation mode (press any key to exit).
+- `help`: See all available commands.
+- `exit`: Terminate the session.
+
+### Maintenance Flags:
+
+- `jarek --setup`: Force reconfiguration.
+- `jarek --uninstall`: Total cleanup (removes models, config, and app).
+
+## Privacy & Requirements
+
+- **100% Local:** Your data never leaves your Mac. Communication happens via `127.0.0.1`.
+- **Storage:** Requires ~10-15GB for AI models.
+- **RAM:** 8GB minimum, 16GB+ recommended.
+
 ## Author
 
-Created by frasntoro
+Created with 💜 by **frasntoro**.
