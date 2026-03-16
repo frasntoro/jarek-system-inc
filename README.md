@@ -2,7 +2,7 @@
 
 A futuristic AI Butler for your macOS Terminal. Jarek is an interactive CLI assistant integrated with **Ollama** to run Large Language Models (LLMs) locally on your machine.
 
-## Evolution 1.3.5
+## Evolution 1.3.6
 
 Jarek has evolved from a simple aesthetic CLI to a fully functional **Local AI Agent**.
 
