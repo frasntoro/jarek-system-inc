@@ -1,0 +1,45 @@
+{
+  "name": "jarek-system-inc",
+  "version": "2.0.0",
+  "description": "A cinematic boot sequence for your terminal: music, ASCII art, and a briefing on the weather and the news.",
+  "type": "module",
+  "bin": {
+    "jarek": "bin/jarek.js"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "files": [
+    "bin",
+    "src",
+    "assets",
+    "README.md",
+    "LICENSE"
+  ],
+  "keywords": [
+    "cli",
+    "terminal",
+    "ascii-art",
+    "boot-sequence",
+    "briefing",
+    "weather",
+    "news",
+    "assistant",
+    "fun"
+  ],
+  "author": "frasntoro",
+  "license": "SEE LICENSE IN LICENSE",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/frasntoro/jarek.git"
+  },
+  "homepage": "https://github.com/frasntoro/jarek#readme",
+  "bugs": {
+    "url": "https://github.com/frasntoro/jarek/issues"
+  },
+  "os": [
+    "darwin",
+    "linux",
+    "win32"
+  ]
+}

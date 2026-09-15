@@ -1,0 +1,16 @@
+# macOS
+.DS_Store
+
+# Dependencies (Jarek has none at runtime, but tooling may install some)
+node_modules/
+
+# Build artefacts
+*.tgz
+
+# Internal notes and private assets — never publish these
+GEMINI.md
+assets/top_secret.txt
+
+# Local environment
+.env
+.env.local
