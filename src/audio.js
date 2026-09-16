@@ -1,12 +1,13 @@
 /**
  * Cross-platform sound playback with no dependencies: the first player that
- * actually starts wins. If none is available the boot sequence still runs on
- * its own clock, silently — the timeline never waits for audio.
+ * actually starts wins. If none is available the caller carries on silently —
+ * the boot timeline never waits for audio.
  */
 
 import { spawn } from "node:child_process";
+import { existsSync } from "node:fs";
 
-function playersFor(platform, file) {
+function musicPlayers(platform, file) {
   switch (platform) {
     case "darwin":
       return [["afplay", [file]]];
@@ -27,21 +28,55 @@ function playersFor(platform, file) {
   }
 }
 
+/** A short system sound, for the end of a focus session. */
+function chimePlayers(platform) {
+  switch (platform) {
+    case "darwin":
+      return [["afplay", ["/System/Library/Sounds/Glass.aiff"]]];
+    case "win32":
+      return [
+        [
+          "powershell",
+          [
+            "-NoProfile",
+            "-NonInteractive",
+            "-Command",
+            "[System.Media.SystemSounds]::Asterisk.Play(); Start-Sleep -Milliseconds 800",
+          ],
+        ],
+      ];
+    default: {
+      const file = [
+        "/usr/share/sounds/freedesktop/stereo/complete.oga",
+        "/usr/share/sounds/freedesktop/stereo/bell.oga",
+      ].find((candidate) => existsSync(candidate));
+      if (!file) return [];
+      return [
+        ["paplay", [file]],
+        ["ffplay", ["-nodisp", "-autoexit", "-loglevel", "quiet", file]],
+      ];
+    }
+  }
+}
+
 /**
- * Starts playback and returns a handle. `stop()` is safe to call at any point,
- * including when playback never started.
+ * Starts the first working player and returns a handle whose `stop()` is safe
+ * to call at any point, including when nothing ever played.
  */
-export function playSound(file, { platform = process.platform } = {}) {
-  const candidates = playersFor(platform, file);
+function playFirst(candidates, { onUnavailable } = {}) {
   let child = null;
   let stopped = false;
 
   const tryNext = (index) => {
-    if (stopped || index >= candidates.length) return;
+    if (stopped) return;
+    if (index >= candidates.length) {
+      onUnavailable?.();
+      return;
+    }
     const [command, args] = candidates[index];
     let started = false;
     try {
-      child = spawn(command, args, { stdio: "ignore" });
+      child = spawn(command, args, { stdio: "ignore", windowsHide: true });
     } catch {
       tryNext(index + 1);
       return;
@@ -69,4 +104,17 @@ export function playSound(file, { platform = process.platform } = {}) {
       child = null;
     },
   };
+}
+
+export function playSound(file, { platform = process.platform } = {}) {
+  return playFirst(musicPlayers(platform, file));
+}
+
+export function playChime({ platform = process.platform } = {}) {
+  return playFirst(chimePlayers(platform), {
+    // No player at all: the terminal bell is better than silence.
+    onUnavailable: () => {
+      if (process.stdout.isTTY) process.stdout.write("\x07");
+    },
+  });
 }

@@ -1,13 +1,17 @@
 /**
- * Jarek speaks the language of the machine he runs on. The locale comes from
- * the environment (LC_ALL, LC_MESSAGES, LANG, LANGUAGE) and falls back to the
- * Intl runtime; English is used for anything not translated yet.
+ * Language, titles and time of day.
  *
- * Adding a language means adding one entry to STRINGS and one to WEATHER.
+ * Jarek speaks the language of the machine he runs on; the texts live in
+ * src/locales, one file per language. Adding a language means adding a file
+ * there and registering it in LOCALES.
  */
 
 import { execFileSync } from "node:child_process";
 
+import en from "./locales/en.js";
+import it from "./locales/it.js";
+
+const LOCALES = { en, it };
 const FALLBACK = "en";
 
 /** "C" and "POSIX" are the neutral locale: they name no language. */
@@ -20,8 +24,7 @@ function usable(tag) {
 /**
  * macOS does not hand the system language to the shell — a terminal can report
  * LANG=C.UTF-8 on a Mac that is entirely in Italian, and Node's Intl then
- * resolves to en-US. The real answer lives in the global preferences, so ask
- * for it, but only when the environment had nothing useful to say.
+ * resolves to en-US. The real answer lives in the global preferences.
  */
 function systemLocale() {
   if (process.platform !== "darwin") return null;
@@ -81,202 +84,46 @@ export function detectLocale(override) {
   // When a language is not translated Jarek falls back to English completely:
   // an English briefing must not carry a French date or an Italian country
   // name. The region is kept, so "en-FR" still formats dates the local way.
-  const lang = STRINGS[requested] ? requested : FALLBACK;
+  const lang = LOCALES[requested] ? requested : FALLBACK;
   const locale = country ? `${lang}-${country}` : lang;
   return { locale, lang, country };
 }
 
-const WEATHER = {
-  en: {
-    0: "clear sky",
-    1: "mainly clear",
-    2: "partly cloudy",
-    3: "overcast",
-    45: "fog",
-    48: "freezing fog",
-    51: "light drizzle",
-    53: "drizzle",
-    55: "heavy drizzle",
-    56: "freezing drizzle",
-    57: "freezing drizzle",
-    61: "light rain",
-    63: "rain",
-    65: "heavy rain",
-    66: "freezing rain",
-    67: "freezing rain",
-    71: "light snow",
-    73: "snow",
-    75: "heavy snow",
-    77: "snow grains",
-    80: "light showers",
-    81: "showers",
-    82: "violent showers",
-    85: "snow showers",
-    86: "heavy snow showers",
-    95: "thunderstorms",
-    96: "thunderstorms with hail",
-    99: "thunderstorms with hail",
-  },
-  it: {
-    0: "cielo sereno",
-    1: "poco nuvoloso",
-    2: "parzialmente nuvoloso",
-    3: "coperto",
-    45: "nebbia",
-    48: "nebbia ghiacciata",
-    51: "pioviggine leggera",
-    53: "pioviggine",
-    55: "pioviggine intensa",
-    56: "pioviggine gelata",
-    57: "pioviggine gelata",
-    61: "pioggia leggera",
-    63: "pioggia",
-    65: "pioggia intensa",
-    66: "pioggia gelata",
-    67: "pioggia gelata",
-    71: "neve leggera",
-    73: "neve",
-    75: "neve intensa",
-    77: "granuli di neve",
-    80: "rovesci leggeri",
-    81: "rovesci",
-    82: "rovesci violenti",
-    85: "rovesci di neve",
-    86: "forti rovesci di neve",
-    95: "temporali",
-    96: "temporali con grandine",
-    99: "temporali con grandine",
-  },
-};
-
-export function describeWeather(code, lang = FALLBACK) {
-  const table = WEATHER[lang] ?? WEATHER[FALLBACK];
-  return table[code] ?? (WEATHER[FALLBACK][code] || "");
+export function getStrings(lang = FALLBACK) {
+  return LOCALES[lang] ?? LOCALES[FALLBACK];
 }
 
-const STRINGS = {
-  en: {
-    boot: {
-      core: "Initializing core systems",
-      power: "Routing power to the arc reactor",
-      coffee: "Brewing coffee, Sir",
-      heuristics: "Calibrating heuristic algorithms",
-      sector: "Mapping the local sector",
-      uplink: "Establishing satellite uplink",
-      atmosphere: "Reading atmospheric sensors",
-      news: "Scanning global news feeds",
-      chrome: "Polishing the chrome",
-      diagnostics: "Running full diagnostics",
-      workshop: "Warming up the workshop",
-      final: "Final safety checks",
-      online: "All systems online",
-    },
-    status: { ok: "OK", warn: "WARN", wait: "··", off: "OFF" },
-    greeting: {
-      morning: "Good morning, Sir.",
-      afternoon: "Good afternoon, Sir.",
-      evening: "Good evening, Sir.",
-      night: "Still awake, Sir?",
-    },
-    briefing: {
-      clock: (time, date) => `It is ${time} on ${date}.`,
-      place: (place) => place,
-      now: (temperature, description, feelsLike) =>
-        `${temperature}, ${description}. Feels like ${feelsLike}.`,
-      tomorrow: (min, max, rain) =>
-        `Tomorrow: ${min} to ${max}${rain === null ? "" : `, ${rain}% chance of rain`}.`,
-      headlines: "Headlines this hour:",
-      diagnostics: (uptime, free, total) => `Local systems nominal — up ${uptime}, ${free} of ${total} GB free.`,
-      closing: {
-        morning: "Have a good day, Sir.",
-        afternoon: "Enjoy the rest of your day, Sir.",
-        evening: "Have a good evening, Sir.",
-        night: "Have a good night, Sir.",
-      },
-      noLocation: "I could not fix your position, Sir.",
-      noNews: "The news feeds are silent, Sir.",
-      offline: "We are offline, Sir. Local systems only.",
-    },
-    help: {
-      usage: "Usage: jarek [options]",
-      options: [
-        ["--city <name>", "brief on a specific city instead of your location"],
-        ["--units <metric|imperial>", "temperature units (default: metric)"],
-        ["--lang <code>", "override the language (en, it)"],
-        ["--no-sound", "run the sequence without music"],
-        ["--no-net", "skip weather and news, stay entirely local"],
-        ["--fast", "skip the boot sequence, go straight to the briefing"],
-        ["--no-color", "disable colour output"],
-        ["-v, --version", "print the version"],
-        ["-h, --help", "print this help"],
-      ],
-      hint: "Press any key during the sequence to skip ahead.",
-    },
-  },
+export function describeWeather(code, lang = FALLBACK) {
+  const table = getStrings(lang).weather;
+  return table[code] ?? LOCALES[FALLBACK].weather[code] ?? "";
+}
 
-  it: {
-    boot: {
-      core: "Avvio dei sistemi principali",
-      power: "Energia al reattore arc",
-      coffee: "Preparo il caffè, signore",
-      heuristics: "Calibrazione degli algoritmi euristici",
-      sector: "Mappatura del settore locale",
-      uplink: "Collegamento satellitare",
-      atmosphere: "Lettura dei sensori atmosferici",
-      news: "Scansione dei notiziari globali",
-      chrome: "Lucidatura delle superfici",
-      diagnostics: "Diagnostica completa",
-      workshop: "Riscaldamento dell'officina",
-      final: "Controlli di sicurezza finali",
-      online: "Tutti i sistemi sono operativi",
-    },
-    status: { ok: "OK", warn: "ATT", wait: "··", off: "OFF" },
-    greeting: {
-      morning: "Buongiorno, signore.",
-      afternoon: "Buon pomeriggio, signore.",
-      evening: "Buonasera, signore.",
-      night: "Ancora sveglio, signore?",
-    },
-    briefing: {
-      clock: (time, date) => `Sono le ${time} di ${date}.`,
-      place: (place) => place,
-      now: (temperature, description, feelsLike) =>
-        `${temperature}, ${description}. Percepiti ${feelsLike}.`,
-      tomorrow: (min, max, rain) =>
-        `Domani: da ${min} a ${max}${rain === null ? "" : `, ${rain}% di probabilità di pioggia`}.`,
-      headlines: "I titoli di quest'ora:",
-      diagnostics: (uptime, free, total) =>
-        `Sistemi locali nella norma — attivo da ${uptime}, ${free} GB liberi su ${total}.`,
-      closing: {
-        morning: "Le auguro una buona giornata, signore.",
-        afternoon: "Le auguro un buon proseguimento di giornata, signore.",
-        evening: "Le auguro una buona serata, signore.",
-        night: "Le auguro una buona notte, signore.",
-      },
-      noLocation: "Non sono riuscito a rilevare la sua posizione, signore.",
-      noNews: "I notiziari tacciono, signore.",
-      offline: "Siamo offline, signore. Solo sistemi locali.",
-    },
-    help: {
-      usage: "Uso: jarek [opzioni]",
-      options: [
-        ["--city <nome>", "briefing su una città specifica invece della sua posizione"],
-        ["--units <metric|imperial>", "unità di temperatura (predefinito: metric)"],
-        ["--lang <codice>", "forza la lingua (en, it)"],
-        ["--no-sound", "esegue la sequenza senza musica"],
-        ["--no-net", "salta meteo e notizie, resta in locale"],
-        ["--fast", "salta la sequenza e va al briefing"],
-        ["--no-color", "disattiva i colori"],
-        ["-v, --version", "mostra la versione"],
-        ["-h, --help", "mostra questo aiuto"],
-      ],
-      hint: "Premi un tasto durante la sequenza per saltare avanti.",
-    },
-  },
-};
+/** The few countries that still measure temperature in Fahrenheit. */
+export function unitsFor(country) {
+  return ["US", "LR", "MM"].includes(country) ? "imperial" : "metric";
+}
 
-export function getStrings(lang = FALLBACK) {
-  return STRINGS[lang] ?? STRINGS[FALLBACK];
+/** How Jarek addresses the user, from the configuration, in the given language. */
+export function titleFor(config, lang = FALLBACK) {
+  const title = config?.title ?? { kind: "sir" };
+  if ((title.kind === "name" || title.kind === "custom") && title.value?.trim()) return title.value.trim();
+  const titles = getStrings(lang).titles;
+  return titles[title.kind] ?? titles.sir;
+}
+
+/**
+ * Returns a copy of a strings tree with every "{title}" filled in, including
+ * the text produced by string functions, so the rest of the code never has to
+ * think about how the user wants to be addressed.
+ */
+export function personalize(value, title) {
+  if (typeof value === "string") return value.replaceAll("{title}", title);
+  if (typeof value === "function") return (...args) => personalize(value(...args), title);
+  if (Array.isArray(value)) return value.map((item) => personalize(item, title));
+  if (value && typeof value === "object") {
+    return Object.fromEntries(Object.entries(value).map(([key, item]) => [key, personalize(item, title)]));
+  }
+  return value;
 }
 
 function timeOfDay(hour) {

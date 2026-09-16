@@ -93,14 +93,31 @@ export const red = (text) => paint(text, COLORS.red);
 
 /* --------------------------------------------------------------- gradients */
 
-/** The house palette, the same warm violet-to-amber sweep Jarek has always had. */
-export const PALETTE = [
+/**
+ * The active palette. It starts as the house violet-to-amber sweep and is
+ * replaced by the user's theme at startup (see src/themes.js); every gradient
+ * reads it at call time, so a theme change applies everywhere at once.
+ */
+let palette = [
   [131, 58, 180],
   [253, 29, 29],
   [252, 176, 69],
 ];
 
-function sample(stops, position) {
+export function setPalette(stops) {
+  if (Array.isArray(stops) && stops.length >= 2) palette = stops;
+}
+
+export function getPalette() {
+  return palette;
+}
+
+/** Blends a colour towards another: 0 keeps it, 1 reaches the target. */
+export function mix(color, target, amount) {
+  return color.map((channel, index) => Math.round(channel + (target[index] - channel) * amount));
+}
+
+export function sample(stops, position) {
   const clamped = Math.min(1, Math.max(0, position));
   const span = clamped * (stops.length - 1);
   const index = Math.min(stops.length - 2, Math.floor(span));
@@ -114,7 +131,7 @@ function sample(stops, position) {
   ];
 }
 
-export function gradientText(text, stops = PALETTE) {
+export function gradientText(text, stops = palette) {
   if (colorLevel === 0 || text.length === 0) return text;
   const characters = [...text];
   const last = Math.max(1, characters.length - 1);
@@ -125,7 +142,7 @@ export function gradientText(text, stops = PALETTE) {
  * Colours several lines by column, so the sweep stays vertically aligned and
  * the block reads as one object rather than a stack of stripes.
  */
-export function gradientBlock(lines, stops = PALETTE) {
+export function gradientBlock(lines, stops = palette) {
   if (colorLevel === 0) return lines;
   const width = Math.max(1, ...lines.map((line) => [...line].length));
   return lines.map((line) =>
@@ -212,6 +229,22 @@ export function truncate(text, width) {
   const characters = [...text];
   if (characters.length <= width) return text;
   return `${characters.slice(0, Math.max(1, width - 1)).join("").trimEnd()}…`;
+}
+
+/** Splits text into lines of at most `width` characters, breaking between words. */
+export function wrap(text, width) {
+  const lines = [];
+  let current = "";
+  for (const word of String(text).split(/\s+/).filter(Boolean)) {
+    if (!current) current = word;
+    else if ([...current].length + 1 + [...word].length <= width) current += ` ${word}`;
+    else {
+      lines.push(current);
+      current = word;
+    }
+  }
+  if (current) lines.push(current);
+  return lines;
 }
 
 /** Pads text to `width`, keeping it centred — used for the status tags. */

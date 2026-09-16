@@ -1,7 +1,10 @@
 /**
  * The payoff: what JARVIS actually says once the systems are up. Lines appear
  * one at a time, paced slowly enough to read, and anything that failed to load
- * is simply left out rather than reported as an error.
+ * is left out or mentioned briefly rather than reported as an error.
+ *
+ * The weather and headline blocks are exported: `weather` and `news` at the
+ * prompt print exactly what the briefing prints.
  */
 
 import { formatUptime } from "./system.js";
@@ -10,9 +13,11 @@ import { gradientText, gray, line, sleep, terminalWidth, truncate, white, isInte
 
 const LINE_DELAY_MS = 260;
 
+const noPause = async () => {};
+
 /** Headlines arrive at any length; a briefing line has to stay one line. */
-function headlineRoom() {
-  return Math.max(40, Math.min(96, terminalWidth() - 6));
+function headlineRoom(indent) {
+  return Math.max(40, Math.min(96, terminalWidth() - 6 - indent.length));
 }
 
 function formatClock(date, locale) {
@@ -29,6 +34,42 @@ function placeLabel(location) {
   return parts.join(", ");
 }
 
+export async function printWeather({ location, weather, strings, lang, indent = "", pause = noPause }) {
+  const degree = weather.degree;
+  line(gray(`${indent}${placeLabel(location)}`));
+  line(
+    white(
+      `${indent}${strings.briefing.now(
+        `${weather.now.temperature}${degree}`,
+        describeWeather(weather.now.code, lang),
+        `${weather.now.feelsLike}${degree}`,
+      )}`,
+    ),
+  );
+  await pause();
+  if (Number.isFinite(weather.tomorrow.min) && Number.isFinite(weather.tomorrow.max)) {
+    line(
+      gray(
+        `${indent}${strings.briefing.tomorrow(
+          `${weather.tomorrow.min}${degree}`,
+          `${weather.tomorrow.max}${degree}`,
+          weather.tomorrow.rainChance,
+        )}`,
+      ),
+    );
+    await pause();
+  }
+}
+
+export async function printHeadlines({ news, strings, indent = "", pause = noPause }) {
+  line(white(`${indent}${strings.briefing.headlines}`));
+  const room = headlineRoom(indent);
+  for (const headline of news) {
+    line(`${indent}  ${gradientText("•")} ${gray(truncate(headline, room))}`);
+    await pause();
+  }
+}
+
 export async function printBriefing({ data, strings, locale, lang }) {
   const now = new Date();
   const pause = async () => {
@@ -41,51 +82,22 @@ export async function printBriefing({ data, strings, locale, lang }) {
 
   const { location, weather, news, system, offline } = data;
 
-  if (weather && location) {
-    const place = placeLabel(location);
-    const degree = weather.degree;
-    line();
-    line(gray(place));
-    line(
-      white(
-        strings.briefing.now(
-          `${weather.now.temperature}${degree}`,
-          describeWeather(weather.now.code, lang),
-          `${weather.now.feelsLike}${degree}`,
-        ),
-      ),
-    );
-    await pause();
-    if (Number.isFinite(weather.tomorrow.min) && Number.isFinite(weather.tomorrow.max)) {
-      line(
-        gray(
-          strings.briefing.tomorrow(
-            `${weather.tomorrow.min}${degree}`,
-            `${weather.tomorrow.max}${degree}`,
-            weather.tomorrow.rainChance,
-          ),
-        ),
-      );
-      await pause();
-    }
-  } else if (offline) {
+  if (offline) {
     line();
     line(gray(strings.briefing.offline));
     await pause();
-  } else if (!location) {
+  } else if (weather && location) {
     line();
-    line(gray(strings.briefing.noLocation));
+    await printWeather({ location, weather, strings, lang, pause });
+  } else {
+    line();
+    line(gray(location ? strings.briefing.noWeather : strings.briefing.noLocation));
     await pause();
   }
 
   if (news?.length) {
     line();
-    line(white(strings.briefing.headlines));
-    const room = headlineRoom();
-    for (const headline of news) {
-      line(`  ${gradientText("•")} ${gray(truncate(headline, room))}`);
-      await pause();
-    }
+    await printHeadlines({ news, strings, pause });
   }
 
   if (system) {
@@ -104,5 +116,4 @@ export async function printBriefing({ data, strings, locale, lang }) {
 
   line();
   line(gradientText(closingFor(now.getHours(), strings)));
-  line();
 }

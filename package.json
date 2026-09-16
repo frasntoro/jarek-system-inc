@@ -1,10 +1,14 @@
 {
   "name": "jarek-system-inc",
-  "version": "2.0.0",
-  "description": "A cinematic boot sequence for your terminal: music, ASCII art, and a briefing on the weather and the news.",
+  "version": "2.1.0",
+  "description": "A JARVIS-style companion for your terminal: a cinematic boot sequence, a weather and news briefing, then focus timer, system scan, custom protocols and a matrix screensaver.",
   "type": "module",
   "bin": {
     "jarek": "bin/jarek.js"
+  },
+  "scripts": {
+    "test": "node --test",
+    "demo": "sh media/render.sh"
   },
   "engines": {
     "node": ">=20.0.0"
@@ -31,11 +35,11 @@
   "license": "SEE LICENSE IN LICENSE",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/frasntoro/jarek.git"
+    "url": "git+https://github.com/frasntoro/jarek-system-inc.git"
   },
-  "homepage": "https://github.com/frasntoro/jarek#readme",
+  "homepage": "https://github.com/frasntoro/jarek-system-inc#readme",
   "bugs": {
-    "url": "https://github.com/frasntoro/jarek/issues"
+    "url": "https://github.com/frasntoro/jarek-system-inc/issues"
   },
   "os": [
     "darwin",

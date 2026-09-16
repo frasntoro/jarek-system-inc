@@ -6,11 +6,26 @@ node_modules/
 
 # Build artefacts
 *.tgz
+media/frames/
 
-# Internal notes and private assets — never publish these
-GEMINI.md
-assets/top_secret.txt
+# Logs
+*.log
+npm-debug.log*
 
 # Local environment
 .env
 .env.local
+
+# Editors
+.vscode/
+.idea/
+
+# AI assistants: local settings, notes and instructions stay on this machine
+.claude/
+CLAUDE.md
+CLAUDE.local.md
+GEMINI.md
+AGENTS.md
+.cursor/
+.cursorrules
+.aider*
