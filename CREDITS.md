@@ -4,17 +4,11 @@
 
 **"Jarek"**, composed and created by **Marco Sgaramella**.
 
-Used in Jarek with the author's permission:
+Used in Jarek with the author's permission, given on 17 September 2026:
 
 > I, the undersigned Marco Sgaramella, as the author and creator of the musical
 > composition "Jarek", authorise frasntoro to use the said musical composition
 > within the Jarek program, distributed through npm.
-
-Original statement, in Italian, received on 17 September 2026:
-
-> Il sottoscritto Marco Sgaramella, in qualità di autore e creatore della
-> composizione musicale "Jarek", autorizza frasntoro all'utilizzo della suddetta
-> composizione musicale all'interno del programma Jarek, distribuito tramite npm.
 
 The recording shipped with Jarek, `assets/music/jarek-intro-marco-sgaramella.wav`,
 is an 18-second excerpt of the composition, edited for the startup sequence. All
