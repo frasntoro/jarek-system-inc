@@ -24,16 +24,17 @@ test("counts today's commits across the repositories under a folder", { skip: !h
   const previous = process.env.GIT_CONFIG_GLOBAL;
   process.env.GIT_CONFIG_GLOBAL = globalConfig;
 
-  const makeRepository = (name, commits) => {
+  const makeRepository = (name, commits, { localEmail, authorEmail = "test@example.com" } = {}) => {
     const repository = join(root, "work", name);
     mkdirSync(repository, { recursive: true });
     const git = (...args) =>
       execFileSync(
         "git",
-        ["-C", repository, "-c", "user.name=Test", "-c", "user.email=test@example.com", "-c", "commit.gpgsign=false", ...args],
+        ["-C", repository, "-c", "user.name=Test", "-c", `user.email=${authorEmail}`, "-c", "commit.gpgsign=false", ...args],
         { stdio: "ignore" },
       );
     git("init", "-q");
+    if (localEmail) execFileSync("git", ["-C", repository, "config", "user.email", localEmail], { stdio: "ignore" });
     for (let index = 0; index < commits; index += 1) git("commit", "-q", "--allow-empty", "-m", `commit ${index}`);
   };
 
@@ -51,6 +52,36 @@ test("counts today's commits across the repositories under a folder", { skip: !h
       { name: "alpha", count: 3 },
       { name: "beta", count: 1 },
     ]);
+  } finally {
+    if (previous === undefined) delete process.env.GIT_CONFIG_GLOBAL;
+    else process.env.GIT_CONFIG_GLOBAL = previous;
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test("each repository counts only its own user's commits", { skip: !hasGit && "git is not installed" }, async () => {
+  const root = mkdtempSync(join(tmpdir(), "jarek-git-author-"));
+  const globalConfig = join(root, "gitconfig");
+  writeFileSync(globalConfig, "[user]\n\temail = old-name@example.com\n");
+  const previous = process.env.GIT_CONFIG_GLOBAL;
+  process.env.GIT_CONFIG_GLOBAL = globalConfig;
+
+  const repository = join(root, "work", "mine");
+  const git = (email, ...args) =>
+    execFileSync("git", ["-C", repository, "-c", "user.name=Test", "-c", `user.email=${email}`, "-c", "commit.gpgsign=false", ...args], {
+      stdio: "ignore",
+    });
+  try {
+    mkdirSync(repository, { recursive: true });
+    execFileSync("git", ["-C", repository, "init", "-q"], { stdio: "ignore" });
+    // This repository commits with its own local email, not the global one.
+    execFileSync("git", ["-C", repository, "config", "user.email", "me@example.com"], { stdio: "ignore" });
+    git("me@example.com", "commit", "-q", "--allow-empty", "-m", "mine 1");
+    git("me@example.com", "commit", "-q", "--allow-empty", "-m", "mine 2");
+    git("someone-else@example.com", "commit", "-q", "--allow-empty", "-m", "theirs");
+
+    const result = await commitsToday({ roots: [join(root, "work")], includeCurrent: false });
+    assert.deepEqual(result.repos, [{ name: "mine", count: 2 }]);
   } finally {
     if (previous === undefined) delete process.env.GIT_CONFIG_GLOBAL;
     else process.env.GIT_CONFIG_GLOBAL = previous;

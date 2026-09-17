@@ -118,3 +118,15 @@ export function playChime({ platform = process.platform } = {}) {
     },
   });
 }
+
+/**
+ * Whether `date` falls in the quiet hours, a window that may cross midnight
+ * (21 → 7). A user can move or disable it with "quietHours" in the config;
+ * `false` turns it off.
+ */
+export function isQuietHour(date, hours) {
+  if (hours === false) return false;
+  const { from, to } = hours;
+  const hour = date.getHours();
+  return from <= to ? hour >= from && hour < to : hour >= from || hour < to;
+}

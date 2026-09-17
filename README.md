@@ -4,10 +4,11 @@
 
 A JARVIS-style companion for your terminal.
 
-Type `jarek`. The music starts, the logo lands on the first beat, and the
-systems come online one by one — in time with the track. When the music fades,
-Jarek tells you what you need to know: the time, the weather where you are, the
-headlines of the hour. Then he stays on duty, waiting for your orders.
+Type `jarek`. The music kicks in, the logo lands on the first beat, Jarek
+welcomes you back, and the systems come online one by one — in time with the
+track. When the music fades, he tells you what you need to know: the time, the
+weather where you are, the headlines of the hour. Then he stays on duty,
+waiting for your orders.
 
 ![Jarek: boot sequence, briefing, scan, focus, break and bye](media/jarek.gif)
 
@@ -27,7 +28,7 @@ jarek
 ```
 
 The first time, Jarek asks three quick questions — how you would like to be
-addressed, which city to use for the weather, and whether you want the music —
+addressed, which city to use for the weather, and whether you want his voice —
 and remembers the answers. `personalize` changes any of them later.
 
 Press any key during the boot sequence to skip ahead.
@@ -39,19 +40,51 @@ At the `jarek ❯` prompt, or straight from your shell without the intro
 
 | Command | What it does |
 | --- | --- |
-| `focus [min]` | A focus session with a live progress bar; a chime and a desktop notification when time is up. `q` stops it. |
-| `scan` | System diagnostics: CPU, memory, disk, battery, network and uptime, with a verdict. |
+| `focus [min]` | A focus session with a live progress bar. Jarek tells you when time is up, with a desktop notification too. `q` stops it. |
+| `scan` | System diagnostics: CPU, memory, disk, battery, network and uptime, with a verdict. Jarek speaks up only when something is wrong. |
 | `break` | Screensaver: digital rain around the Jarek logo, in your colours. Any key returns you where you were. Also `relax` or `screensaver`. |
 | `weather [city]` | Weather now and tomorrow, for your city or any other. |
 | `news` | The headlines of the hour. |
 | `protocol [name]` | Runs one of your custom sequences; `protocol new` builds one (see below). |
-| `personalize` | One menu for everything: how Jarek addresses you, city, music, colours, protocols. |
+| `personalize` | One menu for everything: how Jarek addresses you, city, music, voice, colours, protocols. |
 | `theme [name]` | Changes Jarek's colours (see below). |
-| `bye` | The power-down sequence, with a summary of today's commits. |
+| `bye` | The power-down sequence: Jarek says goodbye and sums up today's commits. |
 
 `help` shows the list again. Arrow keys recall previous commands and Tab
 completes them. Italian speakers can type `meteo`, `notizie`, `protocollo`,
 `personalizza` and `tema`.
+
+## Voice and music
+
+Jarek speaks, in English, at a few chosen moments:
+
+- **The boot sequence** — he welcomes you back, then adds a line that fits the
+  hour: a cup of coffee in the morning, a short break in the afternoon, a good
+  evening or a good night. If it is raining, snowing, freezing or very hot
+  outside, he tells you that instead.
+- **The end of a `focus` session**, so you hear it even away from the screen.
+- **`scan`**, only when something is wrong, and only about the worst of it.
+- **`bye`**, as the systems power down.
+
+He addresses you as you asked — sir or ma'am, or without a title if you chose
+a name, which cannot be pre-recorded. Turn the voice off in `personalize`;
+`--no-sound` silences everything.
+
+The startup music is **"Jarek" by Marco Sgaramella**. Between 9 pm and 7 am the
+music stays off and only the voice remains, so a late start stays quiet. The
+window can be moved, or switched off, in the configuration file:
+
+```json
+{ "quietHours": { "from": 22, "to": 8 } }
+```
+
+To start with a track of your own, point `startupSound` at a file on your
+machine; it is never part of the package. The boot sequence is timed for about
+18 seconds at 120 BPM.
+
+```json
+{ "startupSound": "~/Music/my-intro.wav" }
+```
 
 ## Colours
 
@@ -106,7 +139,9 @@ could not be done.
   they do in your terminal. Jarek asks whether a command should keep running in
   the background, like a server.
 
-`protocol` lists your protocols with their actions, and
+`protocol` lists your protocols with their actions. `protocol edit <name>`
+adds, removes or reorders actions and renames the protocol; changes are saved
+when you press Enter to finish, and Ctrl+C discards them.
 `protocol delete <name>` removes one. They are stored in the configuration
 file, where they can also be edited by hand:
 
@@ -137,7 +172,7 @@ Options go before the command.
 | `--city <name>` | Brief on a specific city for this run |
 | `--units <metric\|imperial>` | Temperature units (default: from your country) |
 | `--lang <code>` | Force the language (`en`, `it`) |
-| `--no-sound` | Run the sequence without music |
+| `--no-sound` | Run without music or voice |
 | `--no-net` | Skip weather and news, stay entirely local |
 | `--fast` | Skip the sequence, go straight to the briefing |
 | `--no-repl` | Exit after the briefing instead of waiting for commands |
@@ -198,12 +233,19 @@ npm run demo      # re-record media/jarek.gif (needs vhs: brew install vhs)
 
 Tests run on macOS, Linux and Windows, with Node 20 and 22, on every push.
 
+## Credits
+
+Music "Jarek" by Marco Sgaramella, used with his permission. Voice generated
+with Kokoro-82M (Apache License 2.0). Logo in the FIGlet font "Slant". See
+[CREDITS.md](CREDITS.md).
+
 ## Licence
 
 Jarek is **proprietary software**. Copyright © 2026 frasntoro, all rights
 reserved. You may download and run it for personal, non-commercial use; you may
-not redistribute, modify or reuse it or its assets. See [LICENSE](LICENSE) for
-the full terms.
+not redistribute, modify or reuse it or its assets. The music and the voice
+engine belong to their authors and are used with permission or under their own
+licences. See [LICENSE](LICENSE) for the full terms.
 
 ## Author
 

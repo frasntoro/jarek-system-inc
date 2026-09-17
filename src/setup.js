@@ -79,6 +79,14 @@ async function askSound(ctx) {
   return yesNo(answer, current);
 }
 
+async function askVoice(ctx) {
+  const s = ctx.strings.setup;
+  const current = ctx.config.voice !== false;
+  const answer = await askLine(ctx, s.voiceQuestion, current ? s.yesDefault : s.noDefault);
+  if (answer === null) return CANCELLED;
+  return yesNo(answer, current);
+}
+
 async function askTheme(ctx) {
   const s = ctx.strings.theme;
   const names = Object.keys(THEMES);
@@ -143,10 +151,10 @@ export async function runSetup(ctx, { firstRun = false } = {}) {
   const city = await askCity(ctx);
   if (city === CANCELLED) return cancelled(ctx);
   line();
-  const sound = await askSound(ctx);
-  if (sound === CANCELLED) return cancelled(ctx);
+  const voice = await askVoice(ctx);
+  if (voice === CANCELLED) return cancelled(ctx);
 
-  const file = save(ctx, { title, city, sound });
+  const file = save(ctx, { title, city, voice });
   if (!file) return null;
 
   line();
@@ -167,6 +175,7 @@ export async function runPersonalize(ctx) {
       [s.items.title, ctx.title],
       [s.items.city, ctx.config.city || ctx.strings.setup.cityAuto],
       [s.items.sound, ctx.config.sound !== false ? s.on : s.off],
+      [s.items.voice, ctx.config.voice !== false ? s.on : s.off],
       [s.items.theme, themeLabel(ctx.config.theme, ctx.strings)],
       [s.items.protocols, s.protocolCount(protocolCount)],
     ];
@@ -203,13 +212,17 @@ export async function runPersonalize(ctx) {
         if (value !== CANCELLED && save(ctx, { sound: value })) line(green(`  ✓ ${ctx.strings.personalize.saved}`));
         break;
       case "4":
+        value = await askVoice(ctx);
+        if (value !== CANCELLED && save(ctx, { voice: value })) line(green(`  ✓ ${ctx.strings.personalize.saved}`));
+        break;
+      case "5":
         value = await askTheme(ctx);
         if (value !== CANCELLED && save(ctx, { theme: value })) {
           // Saved and applied already: the confirmation is drawn in the new colours.
           line(gradientText(`  ✓ ${ctx.strings.theme.set(themeLabel(value, ctx.strings))}`));
         }
         break;
-      case "5":
+      case "6":
         await manageProtocols(ctx);
         break;
       default:

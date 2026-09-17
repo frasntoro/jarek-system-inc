@@ -4,6 +4,7 @@
  *   protocol               list them, with their actions
  *   protocol <name>        run one
  *   protocol new [name]    create one, guided, no file editing needed
+ *   protocol edit <name>   add, remove or reorder actions, or rename it
  *   protocol delete <name> remove one
  *
  * An action is stored in the configuration as one of:
@@ -46,6 +47,16 @@ const BACKGROUND_GRACE_MS = 800;
 const LAUNCHER_WAIT_MS = 5000;
 const NEW_WORDS = new Set(["new", "nuovo", "crea", "create"]);
 const DELETE_WORDS = new Set(["delete", "elimina", "rimuovi", "remove"]);
+const EDIT_WORDS = new Set(["edit", "modifica", "cambia", "modify"]);
+const isReserved = (word) => [NEW_WORDS, DELETE_WORDS, EDIT_WORDS].some((words) => words.has(word.toLowerCase()));
+
+/** A copy of `list` with the item at `from` moved to `to` (both zero-based). */
+export function moveItem(list, from, to) {
+  const copy = [...list];
+  const [item] = copy.splice(from, 1);
+  copy.splice(to, 0, item);
+  return copy;
+}
 
 /* ------------------------------------------------------ reading the input */
 
@@ -358,7 +369,7 @@ export async function createProtocol(ctx, presetName = "") {
     const answer = await askLine(ctx, s.askName);
     if (answer === null || !answer.trim()) return cancel(ctx);
     name = answer.trim();
-    if (NEW_WORDS.has(name.toLowerCase()) || DELETE_WORDS.has(name.toLowerCase())) {
+    if (isReserved(name)) {
       line(amber(`  ${s.reservedName(name)}`));
       name = "";
     }
@@ -465,7 +476,130 @@ export async function deleteProtocol(ctx, wanted = "") {
   return true;
 }
 
-/** Menu item 5 of `personalize`. */
+async function askPosition(ctx, question, count) {
+  for (;;) {
+    const answer = await askLine(ctx, question, `1-${count}`);
+    if (answer === null) return CANCEL;
+    const typed = answer.trim();
+    if (!typed) return SKIP;
+    const position = Number(typed);
+    if (Number.isInteger(position) && position >= 1 && position <= count) return position - 1;
+    line(amber(`  ${ctx.strings.personalize.invalid}`));
+  }
+}
+
+/**
+ * Changes an existing protocol on a working copy: nothing is written until
+ * the user presses Enter to finish, and Ctrl+C discards everything.
+ */
+export async function editProtocol(ctx, wanted = "") {
+  const s = ctx.strings.protocol;
+  if (!Object.keys(ctx.config.protocols ?? {}).length) {
+    line(white(`  ${s.none}`));
+    line(gray(`  ${s.createHint}`));
+    return false;
+  }
+
+  let typed = wanted.trim();
+  if (!typed) {
+    printList(ctx);
+    line();
+    const answer = await askLine(ctx, s.askEdit);
+    if (answer === null || !answer.trim()) return false;
+    typed = answer.trim();
+  }
+  const name = findName(ctx, typed);
+  if (!name) {
+    line(amber(`  ${s.notFound(typed)}`));
+    return false;
+  }
+
+  let steps = Array.isArray(ctx.config.protocols[name]) ? [...ctx.config.protocols[name]] : [];
+  let newName = name;
+  let changed = false;
+  const discard = () => {
+    line();
+    line(gray(`  ${s.editCancelled}`));
+    line();
+    return false;
+  };
+
+  for (;;) {
+    line();
+    line(`  ${gradientText(s.editHeader)} ${gray(`· ${newName}`)}`);
+    if (steps.length) steps.forEach((step, index) => line(gray(`    ${index + 1}. ${describeStep(step, ctx.strings)}`)));
+    else line(gray(`    ${s.noActions}`));
+
+    const choice = await ctx.ask(`  ${gray(`${s.editMenu} (${s.enterFinishes}) ›`)} `);
+    if (choice === null) return discard();
+    const picked = choice.trim();
+    if (!picked) break;
+
+    if (picked === "1") {
+      const step = await askStep(ctx, steps.length + 1);
+      if (step === CANCEL) return discard();
+      if (step !== DONE && step !== SKIP) {
+        steps.push(step);
+        changed = true;
+        line(green(`  ✓ ${step.label}`));
+      }
+    } else if (picked === "2" && steps.length) {
+      const at = await askPosition(ctx, s.askRemove, steps.length);
+      if (at === CANCEL) return discard();
+      if (at !== SKIP) {
+        const [removed] = steps.splice(at, 1);
+        changed = true;
+        line(green(`  ✓ ${s.removed(describeStep(removed, ctx.strings))}`));
+      }
+    } else if (picked === "3" && steps.length > 1) {
+      const from = await askPosition(ctx, s.askMoveFrom, steps.length);
+      if (from === CANCEL) return discard();
+      if (from === SKIP) continue;
+      const to = await askPosition(ctx, s.askMoveTo, steps.length);
+      if (to === CANCEL) return discard();
+      if (to === SKIP) continue;
+      steps = moveItem(steps, from, to);
+      changed = changed || from !== to;
+    } else if (picked === "4") {
+      const answer = await askLine(ctx, s.askRename, ctx.strings.setup.enterKeeps(newName));
+      if (answer === null) return discard();
+      const candidate = answer.trim();
+      if (!candidate || candidate === newName) continue;
+      const clash = findName(ctx, candidate);
+      if (isReserved(candidate)) line(amber(`  ${s.reservedName(candidate)}`));
+      else if (clash && clash !== name) line(amber(`  ${s.nameTaken(candidate)}`));
+      else {
+        newName = candidate;
+        changed = true;
+      }
+    } else {
+      line(amber(`  ${ctx.strings.personalize.invalid}`));
+    }
+  }
+
+  if (!changed) {
+    line();
+    return false;
+  }
+  if (!steps.length) {
+    line(amber(`  ${s.emptyNotSaved}`));
+    line();
+    return false;
+  }
+
+  // Rebuilt in the original order, so a renamed protocol keeps its place.
+  const protocols = {};
+  for (const [key, value] of Object.entries(ctx.config.protocols)) {
+    if (key === name) protocols[newName] = steps;
+    else protocols[key] = value;
+  }
+  if (!saveProtocols(ctx, protocols)) return false;
+  line(gradientText(`  ✓ ${s.edited(newName)}`));
+  line();
+  return true;
+}
+
+/** Menu item 6 of `personalize`. */
 export async function manageProtocols(ctx) {
   const s = ctx.strings.protocol;
   printList(ctx);
@@ -473,7 +607,8 @@ export async function manageProtocols(ctx) {
   line(gray(`    ${s.manageQuestion}`));
   const answer = await ctx.ask(`  ${gray(`(${ctx.strings.personalize.enterExits}) ›`)} `);
   if (answer === "1") await createProtocol(ctx);
-  else if (answer === "2") await deleteProtocol(ctx);
+  else if (answer === "2") await editProtocol(ctx);
+  else if (answer === "3") await deleteProtocol(ctx);
 }
 
 function cancel(ctx) {
@@ -497,6 +632,11 @@ export async function protocol(args, ctx) {
     line();
     await deleteProtocol(ctx, rest.join(" "));
     line();
+    return;
+  }
+  if (EDIT_WORDS.has(word)) {
+    line();
+    await editProtocol(ctx, rest.join(" "));
     return;
   }
 

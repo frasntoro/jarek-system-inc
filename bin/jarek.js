@@ -14,12 +14,12 @@ import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { AUDIO_FILE } from "../src/cues.js";
-import { playSound } from "../src/audio.js";
+import { isQuietHour, playSound } from "../src/audio.js";
 import { printBriefing } from "../src/briefing.js";
 import { printLogo, runBootSequence, track } from "../src/boot.js";
+import { MUSIC_FILE, QUIET_HOURS } from "../src/cues.js";
 import { findCommand, visibleCommands } from "../src/commands/index.js";
-import { loadConfig } from "../src/config.js";
+import { loadConfig, startupSound } from "../src/config.js";
 import { createContext } from "../src/context.js";
 import { detectLocale } from "../src/i18n.js";
 import { createReader, runRepl } from "../src/repl.js";
@@ -28,6 +28,7 @@ import { resolveLocation } from "../src/sources/geo.js";
 import { getHeadlines } from "../src/sources/news.js";
 import { getWeather } from "../src/sources/weather.js";
 import { getSystemInfo } from "../src/system.js";
+import { introGreeting, introRemark, speak } from "../src/voice.js";
 import { gradientText, gray, hideCursor, isInteractive, line, showCursor, white } from "../src/ui.js";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
@@ -140,12 +141,20 @@ async function playIntroAndBriefing(ctx) {
   if (options.fast) {
     printLogo();
   } else {
-    const withMusic = options.sound && ctx.config.sound !== false;
+    // The shipped track, or the user's own; never during the quiet hours.
+    const quiet = isQuietHour(new Date(), ctx.config.quietHours ?? QUIET_HOURS);
+    const wantsMusic = options.sound && ctx.config.sound !== false && !quiet;
+    const music = wantsMusic ? startupSound(ctx.config, join(root, "assets", MUSIC_FILE)) : null;
     await runBootSequence({
       strings: ctx.strings,
       tasks,
       offline,
-      startAudio: withMusic ? () => playSound(join(root, "assets", AUDIO_FILE)) : null,
+      startAudio: music ? () => playSound(music) : null,
+      voice: {
+        greeting: () => speak(introGreeting(), ctx),
+        // Chosen when it is spoken, so the weather has usually arrived by then.
+        remark: () => speak(introRemark(new Date(), weatherTask.value), ctx),
+      },
     });
   }
 

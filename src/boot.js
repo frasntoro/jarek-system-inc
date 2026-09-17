@@ -27,7 +27,7 @@ import {
   white,
   write,
 } from "./ui.js";
-import { BRIEFING_AT, LOGO_AT, TIMELINE } from "./cues.js";
+import { BRIEFING_AT, LOGO_AT, TIMELINE, VOICE_AT } from "./cues.js";
 
 /** How often the progress bar is redrawn while the sequence plays. */
 const BAR_TICK_MS = 70;
@@ -58,7 +58,7 @@ export function track(promise) {
   return entry;
 }
 
-export async function runBootSequence({ strings, tasks, startAudio, offline = false }) {
+export async function runBootSequence({ strings, tasks, startAudio, voice = null, offline = false }) {
   const started = Date.now();
   const elapsed = () => (Date.now() - started) / 1000;
   const audio = startAudio?.();
@@ -68,6 +68,7 @@ export async function runBootSequence({ strings, tasks, startAudio, offline = fa
   let skipped = false;
   let logoPrinted = false;
   let barTimer = null;
+  const spoken = [];
 
   const textRoom = () => Math.max(10, terminalWidth() - 12);
 
@@ -120,7 +121,12 @@ export async function runBootSequence({ strings, tasks, startAudio, offline = fa
       clearLine();
       barVisible = false;
     }
-    audio?.stop();
+    // A skipped intro silences the music and the voice; a finished one lets the
+    // track play out its fade, which is still sounding when the briefing begins.
+    if (wasSkipped) {
+      audio?.stop();
+      for (const line of spoken) line?.stop();
+    }
     stopListeningForSkip();
   };
 
@@ -178,6 +184,11 @@ export async function runBootSequence({ strings, tasks, startAudio, offline = fa
       });
     }
 
+    if (voice) {
+      at(VOICE_AT.greeting, () => spoken.push(voice.greeting()));
+      at(VOICE_AT.remark, () => spoken.push(voice.remark()));
+    }
+
     at(BRIEFING_AT, () => {
       finish(false);
       resolve({ skipped: false });
@@ -202,6 +213,6 @@ export async function runBootSequence({ strings, tasks, startAudio, offline = fa
 export function printLogo() {
   for (const logoLine of gradientBlock(logoLines())) line(logoLine);
   line();
-  line(gradientText("  by frasntoro"));
+  line(gradientText("by frasntoro"));
   line();
 }

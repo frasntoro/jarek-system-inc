@@ -1,7 +1,7 @@
 {
   "name": "jarek-system-inc",
-  "version": "2.1.0",
-  "description": "A JARVIS-style companion for your terminal: a cinematic boot sequence, a weather and news briefing, then focus timer, system scan, custom protocols and a matrix screensaver.",
+  "version": "2.2.0",
+  "description": "A JARVIS-style companion for your terminal: a cinematic boot sequence with music and voice, a weather and news briefing, then focus timer, system scan, custom protocols and a screensaver.",
   "type": "module",
   "bin": {
     "jarek": "bin/jarek.js"
@@ -18,7 +18,8 @@
     "src",
     "assets",
     "README.md",
-    "LICENSE"
+    "LICENSE",
+    "CREDITS.md"
   ],
   "keywords": [
     "cli",

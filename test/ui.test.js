@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
+import { isQuietHour } from "../src/audio.js";
 import { formatRemaining, parseMinutes } from "../src/commands/focus.js";
 import { formatUptime } from "../src/system.js";
 import { clip, timeAgo } from "../src/commands/weather.js";
@@ -78,4 +79,13 @@ test("timeAgo speaks the user's language", () => {
   assert.equal(timeAgo(now - 3 * 3_600_000, "en-US", now), "3 hours ago");
   assert.equal(timeAgo(now - 26 * 3_600_000, "it-IT", now), "ieri");
   assert.equal(timeAgo(null, "it-IT", now), null);
+});
+
+test("quiet hours cross midnight and can be turned off", () => {
+  const at = (hour) => new Date(2026, 8, 17, hour, 30);
+  const night = { from: 21, to: 7 };
+  for (const hour of [21, 23, 0, 6]) assert.equal(isQuietHour(at(hour), night), true, `${hour}:30`);
+  for (const hour of [7, 12, 20]) assert.equal(isQuietHour(at(hour), night), false, `${hour}:30`);
+  assert.equal(isQuietHour(at(14), { from: 13, to: 15 }), true);
+  assert.equal(isQuietHour(at(23), false), false);
 });

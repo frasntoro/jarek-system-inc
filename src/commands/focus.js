@@ -6,6 +6,7 @@
 
 import { playChime } from "../audio.js";
 import { notify } from "../notify.js";
+import { speak } from "../voice.js";
 import {
   clearLine,
   gradientBlock,
@@ -102,7 +103,7 @@ export async function focus(args, ctx) {
     line();
     line();
     line(gradientText(`  ${s.done}`));
-    playChime();
+    if (!speak("focus-done", ctx)) playChime();
     notify(s.notifyTitle, s.notifyBody);
   } else {
     line();

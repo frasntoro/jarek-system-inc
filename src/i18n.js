@@ -126,7 +126,7 @@ export function personalize(value, title) {
   return value;
 }
 
-function timeOfDay(hour) {
+export function timeOfDay(hour) {
   if (hour < 5) return "night";
   if (hour < 12) return "morning";
   if (hour < 18) return "afternoon";

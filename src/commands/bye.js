@@ -5,6 +5,7 @@
  */
 
 import { commitsToday } from "../sources/git.js";
+import { speak } from "../voice.js";
 import {
   center,
   clearLine,
@@ -38,6 +39,7 @@ export async function bye(args, ctx) {
   const barWidth = Math.min(34, terminalWidth() - 12);
 
   line();
+  speak("bye", ctx);
   hideCursor();
   for (const [index, step] of s.steps.entries()) {
     if (isInteractive) clearLine();

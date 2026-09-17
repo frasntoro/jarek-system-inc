@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { describeStep, matchApps, normalizeSite } from "../src/commands/protocol.js";
+import { describeStep, matchApps, moveItem, normalizeSite } from "../src/commands/protocol.js";
 import { getStrings } from "../src/i18n.js";
 
 test("websites are completed the way people type them", () => {
@@ -30,4 +30,12 @@ test("every kind of action is described in words", () => {
   assert.equal(describeStep({ open: "~/Documents" }, strings), "Apro ~/Documents");
   assert.equal(describeStep({ run: "npm run dev" }, strings), "Eseguo: npm run dev");
   assert.equal(describeStep({}, strings), "azione senza nulla da fare");
+});
+
+test("actions can be moved without touching the original list", () => {
+  const steps = ["a", "b", "c", "d"];
+  assert.deepEqual(moveItem(steps, 0, 2), ["b", "c", "a", "d"]);
+  assert.deepEqual(moveItem(steps, 3, 0), ["d", "a", "b", "c"]);
+  assert.deepEqual(moveItem(steps, 1, 1), ["a", "b", "c", "d"]);
+  assert.deepEqual(steps, ["a", "b", "c", "d"]);
 });

@@ -4,7 +4,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, beforeEach, test } from "node:test";
 
-import { configPath, defaultConfig, loadConfig, saveConfig } from "../src/config.js";
+import { configPath, defaultConfig, loadConfig, saveConfig, startupSound } from "../src/config.js";
 import { createContext } from "../src/context.js";
 import { THEMES } from "../src/themes.js";
 import { getPalette } from "../src/ui.js";
@@ -73,4 +73,14 @@ test("a context change is saved and applied at once: title and colours", () => {
   assert.equal(ctx.strings.greeting.morning, "Buongiorno, Ada.");
   assert.deepEqual(getPalette(), THEMES.arc);
   assert.equal(loadConfig().title.value, "Ada");
+});
+
+test("a personal startup sound is used only when the file exists", () => {
+  const shipped = "/package/assets/jarek-startup.wav";
+  const mine = join(dir, "my-intro.wav");
+  writeFileSync(mine, "");
+  assert.equal(startupSound({ startupSound: mine }, shipped), mine);
+  assert.equal(startupSound({ startupSound: join(dir, "missing.wav") }, shipped), shipped);
+  assert.equal(startupSound({ startupSound: "  " }, shipped), shipped);
+  assert.equal(startupSound({}, shipped), shipped);
 });

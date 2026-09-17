@@ -36,8 +36,19 @@ export function createReader({ completer } = {}) {
     if (resolve) resolve(text);
     else queued.push(text);
   });
-  // Ctrl+C at the prompt means "leave", like Ctrl+D.
-  rl.on("SIGINT", () => rl.close());
+  // Ctrl+C answers the question being asked with "cancel" (null): inside a
+  // wizard that backs out of it, at the jarek ❯ prompt it means leave. With
+  // nothing being asked, it closes the reader like Ctrl+D.
+  rl.on("SIGINT", () => {
+    const resolve = waiting.shift();
+    if (!resolve) {
+      rl.close();
+      return;
+    }
+    rl.write(null, { ctrl: true, name: "u" });
+    process.stdout.write("\n");
+    resolve(null);
+  });
   rl.on("close", () => {
     closed = true;
     if (Array.isArray(rl.history)) sharedHistory = rl.history;

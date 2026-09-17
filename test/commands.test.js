@@ -61,3 +61,22 @@ test("boot cues run in order, inside the track, with a text in every language", 
   assert.ok(BRIEFING_AT > previous && BRIEFING_AT < AUDIO_DURATION);
   assert.equal(TIMELINE.at(-1).final, true);
 });
+
+test("the shipped startup music is a real, full-length WAV", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { MUSIC_FILE } = await import("../src/cues.js");
+  const wav = readFileSync(new URL(`../assets/${MUSIC_FILE}`, import.meta.url));
+  // Existing is not enough: an empty or truncated file must fail here.
+  assert.equal(wav.toString("ascii", 0, 4), "RIFF");
+  assert.equal(wav.toString("ascii", 8, 12), "WAVE");
+  const channels = wav.readUInt16LE(22);
+  const byteRate = wav.readUInt32LE(28);
+  const dataAt = wav.indexOf("data", 12);
+  const declared = wav.readUInt32LE(dataAt + 4);
+  const present = wav.length - (dataAt + 8);
+  // The header of a truncated file still claims the full length: count the bytes that are really there.
+  assert.ok(present >= declared, `the file holds ${present} audio bytes but declares ${declared}`);
+  const seconds = present / byteRate;
+  assert.equal(channels, 2);
+  assert.ok(Math.abs(seconds - AUDIO_DURATION) < 0.1, `music lasts ${seconds.toFixed(2)}s, the timeline expects ${AUDIO_DURATION}s`);
+});

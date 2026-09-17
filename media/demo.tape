@@ -7,7 +7,7 @@
 #
 # It runs against media/demo-config, so your own configuration is never
 # touched and the recording is the same on every machine. GIFs carry no
-# sound, so the music is switched off.
+# sound, so music and voice are switched off.
 
 Output media/frames/
 

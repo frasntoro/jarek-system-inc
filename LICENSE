@@ -22,39 +22,52 @@ them. By downloading, installing or running Jarek you accept these terms.
    (e) remove, obscure or alter any copyright, trademark or attribution notice.
 
 3. ASSETS
-   The audio, artwork, ASCII art and written content shipped with Jarek are
-   protected separately under this licence and may not be extracted, reused or
-   redistributed for any purpose.
+   The music, voice recordings, artwork, ASCII art and written content shipped
+   with Jarek may not be extracted, reused or redistributed for any purpose.
 
-4. OWNERSHIP
+4. THIRD-PARTY MATERIAL
+   Some of the material shipped with Jarek belongs to third parties and is used
+   with their permission or under their own licences:
+   (a) the startup music "Jarek" is composed and created by Marco Sgaramella
+       and is used with his permission; all rights in the composition remain
+       with its author;
+   (b) the spoken lines were generated with Kokoro-82M by hexgrad, released
+       under the Apache License 2.0;
+   (c) the logo is set in the FIGlet font "Slant" by Glenn Chappell.
+   Details, including the author's statement of permission for the music, are
+   in CREDITS.md. Nothing in this licence grants rights in third-party material
+   beyond its use within Jarek.
+
+5. OWNERSHIP
    Jarek is licensed, not sold. All right, title and interest in Jarek,
    including every intellectual property right in it, remain with the
-   copyright holder.
+   copyright holder, except for the third-party material described in
+   section 4, which remains with its respective owners.
 
-5. THIRD-PARTY SERVICES
+6. THIRD-PARTY SERVICES
    Jarek can contact third-party network services to retrieve your approximate
    location, weather data and news headlines. Those services are governed by
    their own terms and privacy policies, and the copyright holder is not
    responsible for them. Network access can be disabled at any time.
 
-6. NO WARRANTY
+7. NO WARRANTY
    JAREK IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
    INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR
    A PARTICULAR PURPOSE AND NONINFRINGEMENT. THE INFORMATION JAREK DISPLAYS IS
    PROVIDED FOR ENTERTAINMENT AND MUST NOT BE RELIED UPON.
 
-7. LIMITATION OF LIABILITY
+8. LIMITATION OF LIABILITY
    IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY CLAIM, DAMAGES OR
    OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
    ARISING FROM, OUT OF OR IN CONNECTION WITH JAREK OR ITS USE.
 
-8. TERMINATION
+9. TERMINATION
    This licence terminates automatically if you breach any of its terms. On
    termination you must stop using Jarek and delete every copy you hold.
 
-9. GOVERNING LAW
-   This licence is governed by the laws of Italy, without regard to its
-   conflict of law provisions.
+10. GOVERNING LAW
+    This licence is governed by the laws of Italy, without regard to its
+    conflict of law provisions.
 
 For any other use, including commercial licensing, contact the copyright
 holder.

@@ -78,13 +78,14 @@ function findRepositories(roots, { maxDepth = 3, maxVisited = 4000, maxRepos = 8
 
 /**
  * Resolves with `{ total, repos: [{ name, count }] }`, or null when git is not
- * installed. Commits are counted per author when a global email is set, and the
- * repository Jarek was started in is included unless `includeCurrent` is false.
+ * installed. Commits are counted per author, using the email each repository
+ * itself commits with — a local user.email overrides the global one, and
+ * people do set different ones per project. The repository Jarek was started
+ * in is included unless `includeCurrent` is false.
  */
 export async function commitsToday({ roots = defaultWorkspaces(), includeCurrent = true } = {}) {
   if ((await git(["--version"])) === null) return null;
 
-  const email = (await git(["config", "--global", "user.email"]))?.trim();
   const current = includeCurrent ? (await git(["rev-parse", "--show-toplevel"]))?.trim() : null;
   const repositories = findRepositories(current ? [...roots, current] : roots);
 
@@ -94,6 +95,7 @@ export async function commitsToday({ roots = defaultWorkspaces(), includeCurrent
     while (next < repositories.length) {
       const repository = repositories[next];
       next += 1;
+      const email = (await git(["-C", repository, "config", "user.email"]))?.trim();
       const output = await git([
         "-C",
         repository,

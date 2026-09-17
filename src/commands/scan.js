@@ -10,6 +10,7 @@ import os from "node:os";
 import { join, parse } from "node:path";
 
 import { formatUptime } from "../system.js";
+import { speak } from "../voice.js";
 import {
   COLORS,
   amber,
@@ -264,14 +265,21 @@ export async function scan(args, ctx) {
 
   // Worst problems first; two at most, so the verdict stays a verdict.
   const issues = [];
-  if (disk && disk.percent >= 90) issues.push(s.verdict.disk(disk.percent));
-  if (battery && battery.state === "discharging" && battery.percent <= 15) issues.push(s.verdict.battery(battery.percent));
-  if (memory && memory.percent >= 90) issues.push(s.verdict.memory(memory.percent));
-  if (cpu && cpu.percent >= 90) issues.push(s.verdict.cpu(cpu.percent));
-  if (network && !network.online) issues.push(s.verdict.offline);
+  if (disk && disk.percent >= 90) issues.push({ text: s.verdict.disk(disk.percent), voice: "scan-disk" });
+  if (battery && battery.state === "discharging" && battery.percent <= 15) {
+    issues.push({ text: s.verdict.battery(battery.percent), voice: "scan-battery" });
+  }
+  if (memory && memory.percent >= 90) issues.push({ text: s.verdict.memory(memory.percent), voice: "scan-memory" });
+  if (cpu && cpu.percent >= 90) issues.push({ text: s.verdict.cpu(cpu.percent), voice: "scan-cpu" });
+  if (network && !network.online) issues.push({ text: s.verdict.offline, voice: "scan-offline" });
 
   line();
-  if (issues.length) for (const issue of issues.slice(0, 2)) line(amber(`  ${issue}`));
-  else line(gradientText(`  ${s.verdict.allGood}`));
+  if (issues.length) {
+    for (const issue of issues.slice(0, 2)) line(amber(`  ${issue.text}`));
+    // Jarek only speaks up when something is wrong, and only about the worst of it.
+    speak(issues[0].voice, ctx);
+  } else {
+    line(gradientText(`  ${s.verdict.allGood}`));
+  }
   line();
 }
