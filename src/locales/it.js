@@ -296,6 +296,7 @@ export default {
       ["--city <nome>", "briefing su una città specifica invece della sua posizione"],
       ["--units <metric|imperial>", "unità di misura (di base: in base al paese)"],
       ["--lang <codice>", "forza la lingua (en, it)"],
+      ["--music", "musica anche nelle ore silenziose"],
       ["--no-sound", "nessuna musica né voce"],
       ["--no-net", "salta meteo e notizie, resta in locale"],
       ["--fast", "salta la sequenza e va al briefing"],

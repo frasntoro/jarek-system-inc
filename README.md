@@ -72,7 +72,8 @@ a name, which cannot be pre-recorded. Turn the voice off in `personalize`;
 
 The startup music is **"Jarek" by Marco Sgaramella**. Between 9 pm and 7 am the
 music stays off and only the voice remains, so a late start stays quiet. The
-window can be moved, or switched off, in the configuration file:
+window can be moved, or switched off, in the configuration file, and
+`jarek --music` plays the music anyway:
 
 ```json
 { "quietHours": { "from": 22, "to": 8 } }
@@ -172,6 +173,7 @@ Options go before the command.
 | `--city <name>` | Brief on a specific city for this run |
 | `--units <metric\|imperial>` | Temperature units (default: from your country) |
 | `--lang <code>` | Force the language (`en`, `it`) |
+| `--music` | Play the music even during the quiet hours |
 | `--no-sound` | Run without music or voice |
 | `--no-net` | Skip weather and news, stay entirely local |
 | `--fast` | Skip the sequence, go straight to the briefing |

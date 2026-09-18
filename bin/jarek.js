@@ -38,6 +38,7 @@ const pkg = JSON.parse(readFileSync(join(root, "package.json"), "utf8"));
 function parseArgs(argv) {
   const options = {
     sound: true,
+    music: false,
     net: true,
     fast: false,
     repl: true,
@@ -53,6 +54,9 @@ function parseArgs(argv) {
     if (!arg.startsWith("-")) return { options, command: arg, args: argv.slice(i + 1) };
 
     switch (arg) {
+      case "--music":
+        options.music = true;
+        break;
       case "--no-sound":
       case "--silent":
         options.sound = false;
@@ -141,8 +145,8 @@ async function playIntroAndBriefing(ctx) {
   if (options.fast) {
     printLogo();
   } else {
-    // The shipped track, or the user's own; never during the quiet hours.
-    const quiet = isQuietHour(new Date(), ctx.config.quietHours ?? QUIET_HOURS);
+    // The shipped track, or the user's own; never during the quiet hours unless --music asks for it.
+    const quiet = !options.music && isQuietHour(new Date(), ctx.config.quietHours ?? QUIET_HOURS);
     const wantsMusic = options.sound && ctx.config.sound !== false && !quiet;
     const music = wantsMusic ? startupSound(ctx.config, join(root, "assets", MUSIC_FILE)) : null;
     await runBootSequence({

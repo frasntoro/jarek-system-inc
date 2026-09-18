@@ -294,6 +294,7 @@ export default {
       ["--city <name>", "brief on a specific city instead of your location"],
       ["--units <metric|imperial>", "temperature units (default: from your country)"],
       ["--lang <code>", "override the language (en, it)"],
+      ["--music", "play the music even during the quiet hours"],
       ["--no-sound", "run without music or voice"],
       ["--no-net", "skip weather and news, stay entirely local"],
       ["--fast", "skip the boot sequence, go straight to the briefing"],

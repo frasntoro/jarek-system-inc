@@ -23,8 +23,11 @@ export const VOICE_AT = { greeting: 1.42, remark: 6.92 };
 /** No music between these hours (the voice still speaks): nobody wants a rock intro at midnight. */
 export const QUIET_HOURS = { from: 21, to: 7 };
 
-/** The logo lands on the first accent of the track. */
-export const LOGO_AT = 0.35;
+/**
+ * The logo lands on the first hit of the track: the music opens with 0.79 s of
+ * silence, and afplay takes about 0.14 s to start producing sound.
+ */
+export const LOGO_AT = 0.93;
 
 /** Opening line of the briefing, over the fade-out. */
 export const BRIEFING_AT = 16.1;
