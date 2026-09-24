@@ -18,11 +18,13 @@ import { isQuietHour, playSound } from "../src/audio.js";
 import { printBriefing } from "../src/briefing.js";
 import { printLogo, runBootSequence, track } from "../src/boot.js";
 import { MUSIC_FILE, QUIET_HOURS } from "../src/cues.js";
-import { findCommand, visibleCommands } from "../src/commands/index.js";
-import { loadConfig, startupSound } from "../src/config.js";
+import { commandNames, findCommand, registerCommand, visibleCommands } from "../src/commands/index.js";
+import { displayPath, loadConfig, startupSound } from "../src/config.js";
 import { createContext } from "../src/context.js";
 import { detectLocale } from "../src/i18n.js";
 import { createReader, runRepl } from "../src/repl.js";
+import { registerAnimation } from "../src/animations.js";
+import { loadPlugins } from "../src/plugins.js";
 import { runSetup } from "../src/setup.js";
 import { resolveLocation } from "../src/sources/geo.js";
 import { getHeadlines } from "../src/sources/news.js";
@@ -112,7 +114,8 @@ function printHelp(ctx) {
   line();
   line(white(s.commandsHeader));
   for (const command of visibleCommands()) {
-    const entry = ctx.strings.commands[command.name];
+    // A command of the user's own brings its own words, having no locale entry.
+    const entry = ctx.strings.commands[command.name] ?? { usage: command.usage ?? command.name, about: command.about ?? "" };
     line(`  ${white(entry.usage.padEnd(column))} ${gray(entry.about)}`);
   }
   line();
@@ -192,6 +195,12 @@ async function main() {
     line(`jarek v${pkg.version}`);
     return 0;
   }
+  // Commands of your own, from ~/.config/jarek/plugins, before anything is dispatched.
+  const { commands: mine, animations, problems } = await loadPlugins({ taken: new Set(commandNames()) });
+  for (const plugin of mine) registerCommand(plugin);
+  for (const animation of animations) registerAnimation(animation);
+  for (const problem of problems) line(gray(ctx.strings.repl.pluginFailed(displayPath(problem.file), problem.reason)));
+
   if (options.help) {
     printHelp(ctx);
     return 0;

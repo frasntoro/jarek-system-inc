@@ -242,6 +242,46 @@ folder, `command` a command to run instead, `process` an app that must be
 closed first. Cleaning is macOS and Linux only; on Linux the entries that are
 not about macOS still apply.
 
+## Commands of your own
+
+Anything in `~/.config/jarek/plugins/*.js` is loaded at startup and added to
+the command list. A command written there lives outside this package: it is
+never published with Jarek, and it survives reinstalling it.
+
+```js
+// ~/.config/jarek/plugins/home.js
+export default {
+  name: "home",
+  about: "turns everything off and locks up",
+  run: async (args, ctx) => ctx.ui.line("  good night"),
+};
+```
+
+A file exports one command as its default, or several as `commands`. Each one
+needs a `name` and a `run(args, ctx)`; `aliases`, `usage`, `about`,
+`fullscreen` (it takes the keyboard, like `break`) and `exits` are optional.
+
+A file can also export `animations`, which `break` then plays by name:
+
+```js
+// ~/.config/jarek/plugins/shows.js
+export const animations = [
+  { name: "aurora", about: "slow lights", run: async (args, ctx) => { /* draw */ } },
+];
+```
+
+`break aurora` runs it, `break` on its own is still the rain, and `break` with
+a name nobody registered lists what there is.
+
+`ctx` is what every built-in command gets: `ctx.config`, `ctx.strings`,
+`ctx.save()`, `ctx.ask()` for a question, and `ctx.ui` with what Jarek draws
+with — `line`, `paint`, `sample`, `getPalette`, `gradientText`, `sleep` and the
+rest — so a plugin follows the current theme without reaching inside the
+package.
+
+Built-in names win: a plugin cannot take over `scan` or `bye`. A plugin that
+fails to load is reported in one line and skipped; Jarek starts anyway.
+
 ## Configuration
 
 Jarek keeps its settings in `~/.config/jarek/config.json` (on Windows,

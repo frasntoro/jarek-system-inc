@@ -12,7 +12,7 @@ import { gradientText, gray, line, white } from "../ui.js";
 import { bye } from "./bye.js";
 import { clean } from "./clean.js";
 import { focus } from "./focus.js";
-import { matrix } from "./matrix.js";
+import { breakCommand } from "./matrix.js";
 import { protocol } from "./protocol.js";
 import { scan } from "./scan.js";
 import { newsCommand, weatherCommand } from "./weather.js";
@@ -21,7 +21,7 @@ export const COMMANDS = [
   { name: "focus", aliases: ["pomodoro"], fullscreen: true, run: focus },
   { name: "scan", aliases: ["diagnostica"], run: scan },
   { name: "clean", aliases: ["pulizia", "pulisci", "spazio", "cleanup"], run: clean },
-  { name: "break", aliases: ["relax", "screensaver", "salvaschermo", "matrix"], fullscreen: true, run: matrix },
+  { name: "break", aliases: ["relax", "screensaver", "salvaschermo", "matrix"], fullscreen: true, run: breakCommand },
   { name: "weather", aliases: ["meteo"], run: weatherCommand },
   { name: "news", aliases: ["notizie"], run: newsCommand },
   { name: "protocol", aliases: ["protocollo", "protocols", "protocolli"], run: protocol },
@@ -36,6 +36,18 @@ export const COMMANDS = [
   { name: "help", aliases: ["aiuto", "?"], hidden: true, run: (args, ctx) => printMenu(ctx) },
   { name: "clear", aliases: ["cls"], hidden: true, run: () => process.stdout.write("\x1b[2J\x1b[3J\x1b[H") },
 ];
+
+/**
+ * Adds a command of the user's own (see src/plugins.js). Built-in names win:
+ * a plugin can extend Jarek, never quietly replace a piece of it.
+ */
+export function registerCommand(command) {
+  if (!command?.name || typeof command.run !== "function") return false;
+  if (findCommand(command.name)) return false;
+  if (command.aliases?.some((alias) => findCommand(alias))) return false;
+  COMMANDS.push({ aliases: [], ...command });
+  return true;
+}
 
 export function findCommand(name) {
   const key = String(name).toLowerCase();
@@ -54,7 +66,10 @@ export function visibleCommands() {
 
 export function printMenu(ctx) {
   const s = ctx.strings;
-  const rows = visibleCommands().map((command) => s.commands[command.name]);
+  // A plugin brings its own words: there is no locale entry for it.
+  const rows = visibleCommands().map(
+    (command) => s.commands[command.name] ?? { usage: command.usage ?? command.name, about: command.about ?? "" },
+  );
   const width = Math.max(...rows.map((row) => row.usage.length)) + 3;
 
   line();

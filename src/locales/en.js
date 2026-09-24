@@ -87,6 +87,8 @@ export default {
   },
 
   repl: {
+    noAnimation: (name, names) => `I have no "${name}" to show. There is: ${names}`,
+    pluginFailed: (file, reason) => `I could not load ${file}: ${reason}`,
     menu: "What can I do for you, {title}?",
     hint: "Type help to see this again, bye to power me down.",
     unknown: (name) => `I don't know "${name}", {title}. Type help for the list.`,
@@ -98,7 +100,7 @@ export default {
     focus: { usage: "focus [min]", about: "focus session with a timer (25 min by default)" },
     clean: { usage: "clean [scan|add|list]", about: "reclaim disk space, one entry at a time" },
     scan: { usage: "scan", about: "full system diagnostics" },
-    break: { usage: "break", about: "screensaver: digital rain around the logo, any key to leave" },
+    break: { usage: "break [name]", about: "screensaver: digital rain around the logo, any key to leave" },
     weather: { usage: "weather [city]", about: "weather now and tomorrow" },
     news: { usage: "news", about: "the latest news in full, with a short summary" },
     protocol: { usage: "protocol [name|new]", about: "run, create or edit your custom sequences" },

@@ -7,7 +7,28 @@
 import { defaultConfig, saveConfig } from "./config.js";
 import { getStrings, personalize, titleFor, unitsFor } from "./i18n.js";
 import { themePalette } from "./themes.js";
-import { setPalette } from "./ui.js";
+import {
+  amber,
+  clearLine,
+  getPalette,
+  gradientBlock,
+  gradientText,
+  gray,
+  green,
+  hideCursor,
+  isInteractive,
+  line,
+  mix,
+  paint,
+  red,
+  sample,
+  setPalette,
+  showCursor,
+  sleep,
+  terminalWidth,
+  white,
+  write,
+} from "./ui.js";
 
 export function createContext({ config, lang, locale, country, options }) {
   const ctx = {
@@ -19,6 +40,32 @@ export function createContext({ config, lang, locale, country, options }) {
     options,
     units: options.units ?? unitsFor(country),
     ask: null,
+  };
+
+  /**
+   * What Jarek draws with, handed to commands the user wrote themselves, so a
+   * plugin never has to reach inside this package for a file path.
+   */
+  ctx.ui = {
+    line,
+    write,
+    paint,
+    sample,
+    mix,
+    getPalette,
+    gradientText,
+    gradientBlock,
+    gray,
+    white,
+    green,
+    amber,
+    red,
+    clearLine,
+    hideCursor,
+    showCursor,
+    isInteractive,
+    terminalWidth,
+    sleep,
   };
 
   /** Re-applies title and colours after the configuration changed. */

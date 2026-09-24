@@ -89,6 +89,8 @@ export default {
   },
 
   repl: {
+    noAnimation: (name, names) => `Non ho nessun "${name}" da mostrare. Ci sono: ${names}`,
+    pluginFailed: (file, reason) => `Non sono riuscito a caricare ${file}: ${reason}`,
     menu: "Cosa posso fare per lei, {title}?",
     hint: "Scriva help per rivedere i comandi, bye per spegnermi.",
     unknown: (name) => `Non conosco "${name}", {title}. Scriva help per l'elenco.`,
@@ -100,7 +102,7 @@ export default {
     focus: { usage: "focus [min]", about: "sessione di concentrazione con timer (25 min di base)" },
     clean: { usage: "clean [scan|add|list]", about: "libera spazio su disco, una voce alla volta" },
     scan: { usage: "scan", about: "diagnostica completa del sistema" },
-    break: { usage: "break", about: "salvaschermo: pioggia digitale attorno al logo, un tasto per uscire" },
+    break: { usage: "break [nome]", about: "salvaschermo: pioggia digitale attorno al logo, un tasto per uscire" },
     weather: { usage: "meteo [città]", about: "meteo di adesso e di domani" },
     news: { usage: "notizie", about: "le ultime notizie per esteso, con un breve riassunto" },
     protocol: { usage: "protocollo [nome|nuovo]", about: "avvia, crea o modifica le sue sequenze personalizzate" },

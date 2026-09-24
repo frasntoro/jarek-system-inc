@@ -8,6 +8,7 @@
  * draws inside the logo's frame, so the logo stays crisp without redraws.
  */
 
+import { animationNames, findAnimation, registerAnimation } from "../animations.js";
 import { getPalette, gradientBlock, gray, isInteractive, line, logoLines, mix, paint, sample, terminalWidth } from "../ui.js";
 
 const GLYPHS = [..."ｱｲｳｴｵｶｷｸｹｺｻｼｽｾｿﾀﾁﾂﾃﾄﾅﾆﾇﾈﾉﾊﾋﾌﾍﾎﾏﾐﾑﾒﾓﾔﾕﾖﾗﾘﾙﾚﾛﾜﾝ0123456789"];
@@ -17,6 +18,21 @@ const FRAME_MS = 50;
 
 const glyph = () => GLYPHS[Math.floor(Math.random() * GLYPHS.length)];
 const moveTo = (row, col) => `\x1b[${row + 1};${col + 1}H`;
+
+/**
+ * `break [name]` — the rain by default, or any animation a plugin registered.
+ * An unknown name says so and lists what there is, rather than doing nothing.
+ */
+export function breakCommand(args, ctx) {
+  const wanted = String(args?.[0] ?? "").trim();
+  if (!wanted) return matrix(args, ctx);
+
+  const animation = findAnimation(wanted);
+  if (animation) return animation.run(args.slice(1), ctx);
+
+  line(gray(`  ${ctx.strings.repl.noAnimation(wanted, animationNames().join(" · "))}`));
+  return Promise.resolve();
+}
 
 export function matrix(args, ctx) {
   if (!isInteractive || !process.stdin.isTTY) {
@@ -119,3 +135,6 @@ export function matrix(args, ctx) {
     input.on("data", leave);
   });
 }
+
+// The one that ships with Jarek, and the one `break` falls back to.
+registerAnimation({ name: "matrix", about: "digital rain around the logo", run: matrix });
