@@ -1,6 +1,6 @@
 {
   "name": "jarek-system-inc",
-  "version": "2.3.0",
+  "version": "2.4.0",
   "description": "A JARVIS-style companion for your terminal: a cinematic boot sequence with music and voice, a weather and news briefing, then focus timer, system scan, disk cleanup, custom protocols and a screensaver.",
   "type": "module",
   "bin": {

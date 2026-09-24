@@ -29,6 +29,24 @@ export const THEMES = {
     [0, 214, 80],
     [180, 255, 180],
   ],
+  // The series' own logo: its red, from the dark edge of the letters to the
+  // lit centre, cooling into the grey of the glow around them.
+  stranger: [
+    [150, 20, 24],
+    [226, 42, 38],
+    [226, 42, 38],
+    [170, 168, 172],
+  ],
+  // The 1985 poster instead: the pink of the title, held as long as the title
+  // holds it, its gold glow, and the neon green of the subtitle, which
+  // arrives only at the end.
+  stranger85: [
+    [224, 55, 122],
+    [224, 55, 122],
+    [244, 199, 76],
+    [244, 199, 76],
+    [203, 250, 86],
+  ],
   vice: [
     [94, 231, 223],
     [180, 144, 202],

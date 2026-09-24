@@ -99,8 +99,8 @@ theme arc                  # set a built-in theme
 theme #ff0080 #7928ca      # or your own gradient: two or more hex colours
 ```
 
-Built-in themes: `instagram`, `iron`, `arc`, `matrix`, `vice`, `mono`. The
-same choice is item 4 of `personalize`.
+Built-in themes: `instagram`, `iron`, `arc`, `matrix`, `stranger`,
+`stranger85`, `vice`, `mono`. The same choice is item 4 of `personalize`.
 
 ## Protocols
 
