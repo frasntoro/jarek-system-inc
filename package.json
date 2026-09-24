@@ -1,7 +1,7 @@
 {
   "name": "jarek-system-inc",
-  "version": "2.2.2",
-  "description": "A JARVIS-style companion for your terminal: a cinematic boot sequence with music and voice, a weather and news briefing, then focus timer, system scan, custom protocols and a screensaver.",
+  "version": "2.3.0",
+  "description": "A JARVIS-style companion for your terminal: a cinematic boot sequence with music and voice, a weather and news briefing, then focus timer, system scan, disk cleanup, custom protocols and a screensaver.",
   "type": "module",
   "bin": {
     "jarek": "bin/jarek.js"
@@ -24,6 +24,7 @@
   "keywords": [
     "cli",
     "terminal",
+    "cleanup",
     "ascii-art",
     "boot-sequence",
     "briefing",

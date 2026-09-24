@@ -42,6 +42,7 @@ At the `jarek ❯` prompt, or straight from your shell without the intro
 | --- | --- |
 | `focus [min]` | A focus session with a live progress bar. Jarek tells you when time is up, with a desktop notification too. `q` stops it. |
 | `scan` | System diagnostics: CPU, memory, disk, battery, network and uptime, with a verdict. Jarek speaks up only when something is wrong. |
+| `clean` | The space you cannot see: caches, leftovers and `node_modules`, reviewed one entry at a time. `clean --scan` only looks (see below). |
 | `break` | Screensaver: digital rain around the Jarek logo, in your colours. Any key returns you where you were. Also `relax` or `screensaver`. |
 | `weather [city]` | Weather now and tomorrow, for your city or any other. |
 | `news` | The headlines of the hour. |
@@ -157,6 +158,89 @@ file, where they can also be edited by hand:
   }
 }
 ```
+
+## Cleaning
+
+`clean` finds the space your Mac gives back without you losing anything: the
+caches apps rebuild by themselves, the leftovers of tools you stopped using,
+the `node_modules` of projects you have not touched in months. It shows a
+report first, then asks about one entry at a time.
+
+```
+jarek ❯ clean
+  JAREK · CLEAN
+
+  Caches that rebuild themselves                    2.2G
+       1.2G  Google Chrome  (open)
+       519M  VS Code · CachedExtensionVSIXs
+        42M  Homebrew
+
+  Projects: node_modules                            1.3G
+       437M  ~/Developer/first-project
+
+  Reclaimable: 3.6G  ·  of which safe: 2.2G
+
+  Go through them one by one? (y/N) › y
+
+  VS Code · CachedExtensionVSIXs  519M
+  ~/Library/Application Support/Code/CachedExtensionVSIXs
+  Clean it? (y/N · never) › y
+    ✓ Done
+```
+
+- `clean --scan` shows the report and touches nothing.
+- `clean --safe` clears the caches that rebuild themselves, without asking.
+- Answering `never` mutes an entry for good; `clean reset` brings them back.
+- An app that is open is skipped, with its name, rather than cleaned underneath it.
+
+**What is removed and what is recoverable.** Caches and leftovers are deleted:
+they rebuild themselves, and the Trash would only hold on to the space they
+were meant to give back. Everything else — the entries worth a thought, and
+`node_modules` — goes to the Trash, so a wrong answer costs a restore. That
+also means the space appears only once you empty it.
+
+**Nothing outside your home folder is ever touched.** Every removal passes one
+check, which refuses anything outside `~`, any folder you keep your own things
+in (`~/Documents`, `~/Library`, `~/Developer` and the like), anything reached
+through a link, and any path containing `..`. An entry that cannot pass is
+reported, not cleaned, wherever it came from.
+
+**Add your own with `clean add`.** Jarek asks what to clean — a folder, or a
+command that cleans up after itself — and the rest is optional:
+
+```
+jarek ❯ clean add
+  NEW CLEAN ENTRY
+  Name? (e.g. Figma) › Figma
+  A folder or a command? (1 folder · 2 command) › 1
+  Folder? (e.g. ~/Library/Caches/Figma) › ~/Library/Caches/Figma
+  It holds 412M right now.
+  Does it rebuild itself? (Y/n) › y
+  App to close first? (Enter = none) › Figma
+  A note for yourself? (Enter = none) ›
+  Save? (Y/n) ›
+  ✓ Saved: Figma
+```
+
+`clean list` shows everything Jarek knows, `clean edit` and `clean delete`
+change or remove your own entries. They live in the configuration file:
+
+```json
+{
+  "clean": {
+    "rules": [
+      { "id": "my-figma", "group": "safe", "label": "Figma", "path": "~/Library/Caches/Figma", "process": "Figma" }
+    ],
+    "skip": ["chrome"],
+    "projectPaths": ["~/Developer", "~/Documents", "~/Desktop"]
+  }
+}
+```
+
+`group` is `safe` (deleted) or `review` (moved to the Trash), `path` is the
+folder, `command` a command to run instead, `process` an app that must be
+closed first. Cleaning is macOS and Linux only; on Linux the entries that are
+not about macOS still apply.
 
 ## Configuration
 

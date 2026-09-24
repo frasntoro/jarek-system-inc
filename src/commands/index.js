@@ -10,6 +10,7 @@
 import { runPersonalize, runSetup, runTheme } from "../setup.js";
 import { gradientText, gray, line, white } from "../ui.js";
 import { bye } from "./bye.js";
+import { clean } from "./clean.js";
 import { focus } from "./focus.js";
 import { matrix } from "./matrix.js";
 import { protocol } from "./protocol.js";
@@ -19,6 +20,7 @@ import { newsCommand, weatherCommand } from "./weather.js";
 export const COMMANDS = [
   { name: "focus", aliases: ["pomodoro"], fullscreen: true, run: focus },
   { name: "scan", aliases: ["diagnostica"], run: scan },
+  { name: "clean", aliases: ["pulizia", "pulisci", "spazio", "cleanup"], run: clean },
   { name: "break", aliases: ["relax", "screensaver", "salvaschermo", "matrix"], fullscreen: true, run: matrix },
   { name: "weather", aliases: ["meteo"], run: weatherCommand },
   { name: "news", aliases: ["notizie"], run: newsCommand },
@@ -32,7 +34,7 @@ export const COMMANDS = [
   { name: "theme", aliases: ["tema", "colore", "colori", "color", "colors"], run: runTheme },
   { name: "bye", aliases: ["exit", "quit", "esci", "ciao"], exits: true, run: bye },
   { name: "help", aliases: ["aiuto", "?"], hidden: true, run: (args, ctx) => printMenu(ctx) },
-  { name: "clear", aliases: ["cls", "pulisci"], hidden: true, run: () => process.stdout.write("\x1b[2J\x1b[3J\x1b[H") },
+  { name: "clear", aliases: ["cls"], hidden: true, run: () => process.stdout.write("\x1b[2J\x1b[3J\x1b[H") },
 ];
 
 export function findCommand(name) {
