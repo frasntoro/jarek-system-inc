@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { existsSync, mkdirSync, mkdtempSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { join, sep } from "node:path";
 import { test } from "node:test";
 
 import {
@@ -161,7 +161,7 @@ test("the shipped catalogue is consistent, and every note is written in both lan
 
     const path = rulePath(rule, "darwin");
     assert.ok(path.startsWith("~/"), `${rule.id} points at ${path}`);
-    assert.equal(validateTarget(path, { home: "/home/tester", mustExist: false }).ok, true, `${rule.id} is not cleanable`);
+    assert.equal(validateTarget(path, { home: join(tmpdir(), "tester"), mustExist: false }).ok, true, `${rule.id} is not cleanable`);
 
     if (rule.note) {
       assert.ok(en.notes[rule.note], `${rule.id}: note missing in English`);
@@ -227,9 +227,11 @@ test("sizes read the way people say them, and paths shorten to ~", () => {
   assert.equal(formatSize(102_400), "100M");
   assert.equal(formatSize(1_048_576), "1.0G");
   assert.equal(formatSize(12_582_912), "12.0G");
-  assert.equal(shortenHome("/Users/tester/Library/Caches", "/Users/tester"), "~/Library/Caches");
-  assert.equal(shortenHome("/opt/homebrew", "/Users/tester"), "/opt/homebrew");
-  assert.equal(expandHome("~/x", "/Users/tester"), "/Users/tester/x");
-  assert.equal(expandHome("~", "/Users/tester"), "/Users/tester");
-  assert.equal(expandHome("/tmp/x", "/Users/tester"), "/tmp/x");
+  // Written with join, so the separator is the one this system uses.
+  const home = join(tmpdir(), "tester");
+  assert.equal(shortenHome(join(home, "Library", "Caches"), home), `~${sep}Library${sep}Caches`);
+  assert.equal(shortenHome(join(tmpdir(), "someone-else"), home), join(tmpdir(), "someone-else"));
+  assert.equal(expandHome("~/x", home), join(home, "x"));
+  assert.equal(expandHome("~", home), home);
+  assert.equal(expandHome(join(tmpdir(), "x"), home), join(tmpdir(), "x"));
 });

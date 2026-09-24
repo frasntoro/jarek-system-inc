@@ -175,7 +175,9 @@ export function validateTarget(target, { home = homedir(), mustExist = true } = 
 
   const expanded = expandHome(raw, home);
   if (!isAbsolute(expanded)) return { ok: false, reason: "relative" };
-  if (expanded.split(sep).includes("..")) return { ok: false, reason: "traversal" };
+  // Both separators: Windows accepts "/" too, and a path is refused for what
+  // it says, not for how it was spelled.
+  if (expanded.split(/[\\/]/).includes("..")) return { ok: false, reason: "traversal" };
 
   const path = resolve(expanded);
   const roots = homeForms(home);
